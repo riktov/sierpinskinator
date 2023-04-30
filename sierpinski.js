@@ -2,29 +2,16 @@
 console.log("This is Sierpinski") ;
 "use strict" ;
 
-let radioSquare = document.getElementById("radio_square") ;
-let radioCircle = document.getElementById("radio_circle") ;
-let radioDiamond = document.getElementById("radio_diamond") ;
-let colorPicker = document.getElementById("colorpicker_wrapper") ;
-let modeButton = document.getElementById("mode_button") ;
-let randomStatesButton = document.getElementById("random_states_button") ;
-let shuffleColorsButton = document.getElementById("shuffle_colors_button") ;
-let scaleUpButton = document.getElementById("scale_up_button") ;
-let scaleDownButton = document.getElementById("scale_down_button") ;
-let pasteButton = document.getElementById("paste_button") ;
-
-var isPlayMode = true ;
-
-var scale = 4 ;
+var scale = 3 ;
 var orderX = 3 ;
 var orderY = 3 ;
 
 //true means recurse, false means solid
-var states = [
-    [true, true, true],
-    [true, false, true],
-    [true, true, true],
-] ;
+// var states = [
+//     [true, true, true],
+//     [true, false, true],
+//     [true, true, true],
+// ] ;
 
 var colors = [
     ["blue", "green", "red"],
@@ -32,13 +19,21 @@ var colors = [
     ["cyan", "magenta", "yellow"],
 ] ;
 
+var states = [
+    [true, true, true, ],
+    [true, false, true, ],
+    [true, true, true,],
+] ;
 
-var paletteSelection = {} ;
-var savedColor = null ;
+// var colors = [
+//     ["black", "red", "black", "red"],
+//     ["red", "black", "red", "black"],
+//     ["black", "red", "black", "red"],
+//     ["red", "black", "red", "black"],
+// ] ;
 
 var canvas=document.getElementById('sierpinski') ;
-console.log("Canvas:", canvas) ;
-	
+
 function draw() {
     var ctx ;
     if(canvas.getContext){
@@ -65,6 +60,7 @@ function filledCell(width, colorStr) {
 	if(radioSquare.checked) {
 		ctx.fillRect(0, 0, width, width) ;
 	}
+
 	if(radioDiamond.checked) {
 		ctx.beginPath();
 		ctx.moveTo(width/2, 0);
@@ -73,53 +69,34 @@ function filledCell(width, colorStr) {
 		ctx.lineTo(0, width/2);
 		ctx.fill() ;
 	}
-	if(radioCircle.checked) {
-		ctx.arc(width/2, width/2, width/2, 0, 2 * Math.PI);
-		ctx.fill() ;
+
+	 if(radioCircle.checked) {
+	 	ctx.arc(width/2, width/2, width/2, 0, 2 * Math.PI);
+	 	ctx.fill() ;
 	}
 
-	return ctx.getImageData(0, 0, width, width) ;
-}
+	/*
+	if(radioCircle.checked) {
+		ctx.beginPath();
+		ctx.moveTo(0, 0);
+		ctx.lineTo(width, 0);
+		ctx.lineTo(0, width);
+		ctx.lineTo(0, 0) ;
+		ctx.fill() ;
+	}
+	*/
 
-function filledPaletteCell(width, colorStr) {
-	var cv = document.createElement("canvas") ;
-	cv.width = width ;
-	cv.height = width ;
-	var ctx = cv.getContext("2d") ;//ready to draw into
-	ctx.fillStyle = colorStr ;
-	
-	//ctx.fillRect(0, 0, width/2, width/2) ;
-	//ctx.fillRect(0, width/2, width/2, width/2) ;
-	var inset = 10 ;
-
-	ctx.fillRect(inset, inset, width - (2 * inset), width - (2 * inset)) ;
 
 	return ctx.getImageData(0, 0, width, width) ;
 }
 
-function drawCellBorder(row, column) {
-	var ctx = canvas.getContext("2d") ;//ready to draw into
-	
-	//ctx.fillRect(0, 0, width/2, width/2) ;
-	//ctx.fillRect(0, width/2, width/2, width/2) ;
-
-	subWidth = canvas.width / orderX ;
-	subHeight = canvas.height / orderY ;
-	originX = column * subWidth ;
-	originY = row * subHeight ;
-	
-	ctx.strokeStyle = "gray" ;
-	ctx.lineWidth = 5;
-	ctx.strokeRect(originX + ctx.lineWidth / 2, originY + ctx.lineWidth/2, subWidth - ctx.lineWidth, subWidth - ctx.lineWidth) ;
-//	ctx.fillRect(originX , originY, inset, inset) ;	
-}
 
 function renderCell(width) {
-	if(width < 3) {
+	if(width < orderX) {
 		return null ;
 	}
 	
-	var subDim = width / 3 ;
+	var subDim = width / orderX ;
 	
 	var tiledCanvas = document.createElement("canvas") ;
 	tiledCanvas.width = width ;
@@ -131,56 +108,28 @@ function renderCell(width) {
 // 	var solidSubImg = null ; 
 	var recursedSubImg = null ;
   
-  //console.log("Start generating image for size ", width) ;
-  for(var row = 0 ; row < states.length ; row++) {
-    for(var col = 0 ; col < states[0].length ; col++) {
-		//console.log(col, row) ;
-      if(!states[row][col]) {
-		  //console.log("Solid square", width) ;
-        //if(solidSubImg == null) {
-          //solidSubImg = filledCell(subDim, "black") ;
-         // solidSubImg = filledCell(subDim, 'rgb(200, 100, 0)') ;
-        //}
-        tiledImg.putImageData(filledCell(subDim, colors[row][col]), col * subDim, row * subDim) ;
-//        tiledImg.putImageData(solidSubImg, col * subDim, row * subDim) ;
-        //tiledImg.copy(solidImg, 0, 0, subDim, subDim, col * subDim, row * subDim, subDim, subDim) ;
-      } else {
-		//console.log("Recursing square:", width) ;
-        if(recursedSubImg == null) {//not initialized
-        	recursedSubImg = renderCell(subDim) ;
-        }  
-        if(recursedSubImg != null) {
-        	tiledImg.putImageData(recursedSubImg, col * subDim, row * subDim) ;
-        } else {//bottomed out
-        	//tiledImg.putImageData(filledCell(subDim, "pink"), col * subDim, row * subDim) ;		
+	//console.log("Start generating image for size ", width) ;
+	for(var row = 0 ; row < states.length ; row++) {
+		for(var col = 0 ; col < states[0].length ; col++) {
+			if(!states[row][col]) {
+				tiledImg.putImageData(filledCell(subDim, colors[row][col]), col * subDim, row * subDim) ;
+			} else {
+				if(recursedSubImg == null) {//not initialized
+					recursedSubImg = renderCell(subDim) ;
+				}  
+	
+				if(recursedSubImg != null) {
+					tiledImg.putImageData(recursedSubImg, col * subDim, row * subDim) ;
+				} 
+				// else bottomed out, so don't draw, or background 
+				//tiledImg.putImageData(filledCell(subDim, "pink"), col * subDim, row * subDim) ;		
+			}
 		}
-      }
-    }
-  }
+	}
   //console.log("Finished generating image for size ", width) ;
   return tiledImg.getImageData(0, 0, width, width) ;
 }
 
-function setFavicon() {
-// 	var link = document.createElement('link');
-//     link.type = 'image/x-icon';
-//     link.rel = 'shortcut icon';
-//     link.href = canvas.toDataURL("image/x-icon");
-//     document.getElementsByTagName('head')[0].appendChild(link);
-
-	var favIconCanvas = document.createElement("canvas") ;
-	favIconCanvas.width = 32 ;
-	favIconCanvas.height = 32 ;
- 	var favIconImg = favIconCanvas.getContext("2d") ;//ready to draw into
- 
-	let scaleWidth = 32 / canvas.width ;
-	let scaleHeight = 32 / canvas.height ;
-	favIconImg.scale(scaleWidth, scaleHeight) ;
-	favIconImg.drawImage(canvas, 0, 0) ;
-	
-	let link = document.getElementById("shortcut_icon") ;
-	link.href = favIconCanvas.toDataURL("image/x-icon");
-}
 //Get Mouse Position
 function getMouseGridPos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
@@ -190,83 +139,6 @@ function getMouseGridPos(canvas, evt) {
     };
 }
 
-function drawPalette() {
-	var ctx ;
-    if(canvas.getContext){
-        ctx = canvas.getContext('2d') ;
-    } else {
-        return null;
-    }
-    
-	var width = canvas.width ;
-	var subDim = width / 3 ;
-	
-	var tiledCanvas = document.createElement("canvas") ;
-	tiledCanvas.width = width ;
-	tiledCanvas.height = width ;
-	var tiledImg = tiledCanvas.getContext("2d") ;//ready to draw into
-	
-	for(var row = 0 ; row < colors.length ; row++) {
-		for(var col = 0 ; col < colors[0].length ; col++) {
-			tiledImg.putImageData(filledPaletteCell(subDim, colors[row][col]), col * subDim, row * subDim) ;
-		}
-	}
-	
-	ctx.putImageData(tiledImg.getImageData(0, 0, width, width), 0, 0) ;
-// 	placeColorPickers(canvas) ;
-}
-
-function onModeButtonClick() {
-	if(isPlayMode) {
-		//switch to palette mode
-		paletteMode() ;
-	} else {
-		playMode() ;
-	}
-}
-
-function paletteMode() {
-	isPlayMode = false ;
-	modeButton.innerHTML = "Done" ;
-	$(colorPicker).show() ;
-	$(".PlayControls button, .PlayControls input").prop("disabled", true) ;
-	pasteButton.disabled = true ;
-	drawPalette() ;
-	selectCellToChange(0, 0) ;
-}
-
-function playMode() {
-	isPlayMode = true ;
-	modeButton.innerHTML = "Change Colors" ;
-	$(colorPicker).hide() ;
-	$(".PlayControls button, .PlayControls input").prop("disabled", false) ;
-	draw() ;
-}
-
-
-function selectCellToChange(row, column) {
-	paletteSelection.column = column ;
-	paletteSelection.row = row ;
-	drawPalette() ;
-	drawCellBorder(row, column) ;
-	let selectedCellColor = colors[row][column] ;
-	console.log("Selected cell color: ", "#" + selectedCellColor) ;
-	
-	$("#colorpicker").spectrum("set", selectedCellColor);
-}
-
-
-function onCopyColor() {
-	savedColor = colors[paletteSelection.row][paletteSelection.column] ;
-	pasteButton.disabled = false ;
-}
-
-function onPasteColor() {
-	colors[paletteSelection.row][paletteSelection.column] = savedColor ;
-	drawPalette();
-	drawCellBorder(paletteSelection.row, paletteSelection.column) ;
-	$("#colorpicker").spectrum("set", savedColor);
-}
 
 function randomizeStates() {
 	for(var row = 0 ; row < states.length ; row++) {
@@ -315,19 +187,36 @@ function shuffleColors() {
 }
 
 function scaleDown() {
-	let dim = canvas.getAttribute("width") ;
-	canvas.setAttribute("width", dim / 3) ;
-	canvas.setAttribute("height", dim / 3) ;
+	let dim = canvas.width
+
+	let newWidth = dim / orderX ;
+	let newHeight = dim / orderY ;
+	if(newWidth < orderX || newHeight < orderY) { return ; } 
+
+	canvas.width = newWidth ;
+	canvas.height = newHeight ;
+
+	console.log("Canvas scaled down to", canvas.width, "x", canvas.height) ;
 	draw() ;
 }
 
 function scaleUp() {
-	let dim = canvas.getAttribute("width") ;
-	canvas.setAttribute("width", dim * 3) ;
-	canvas.setAttribute("height", dim * 3) ;
+	let dim = canvas.width ;
+
+	canvas.width = dim * orderX ;
+	canvas.height = dim * orderY ;
+
+	console.log("Canvas scaled up to", canvas.width, "x", canvas.height) ;
 	draw() ;
 }
 
+
+function setFromGrid(grid) {
+	console.log("grid in setFromGrid", grid) ;
+	states = grid.states ;
+	colors = grid.colors ;
+	draw() ;
+}
 ///////////////////////////////////////////////////////////
 // initialize from here
 
@@ -343,16 +232,12 @@ canvas.addEventListener("click", function (evt) {
 	}
 }, false);
 
-playMode() ;
-
 $("#colorpicker").spectrum({
 	color: "#f00",
 	change: function(color) {
 		//$("#basic-log").text("change called: " + color.toHexString());
 		colors[paletteSelection.row][paletteSelection.column] = color.toHexString() ;
-		drawPalette();
+		drawColorPalette();
 		drawCellBorder(paletteSelection.row, paletteSelection.column) ;
 	}
 });
-
-colorPicker.hidden = true ;
