@@ -13,7 +13,7 @@
 				display:inline;
             }
             #mode_button {
-				width: 9em ;
+				width: 10em ;
 				float:left ;
 				margin-right: 10px ;
             }
@@ -78,7 +78,8 @@
 			</div>
 
 			<div>
-				<input size="8" maxlength="8" id="sierp_input" type="text" onkeypress="pressed();" onchange="pressed();">
+				<p>Hex: <input size="8" maxlength="8" id="hex_input" type="text" onkeypress="enteredHex();" onchange="enteredHex();"></p>
+				<p>String: <input size="8" maxlength="8" id="string_input" type="text" onkeypress="pressed();" onchange="pressed();"></p>
 			</div>		
         </div>
         
@@ -92,12 +93,15 @@
 		<script type="text/javascript" src="changecolors.js"></script>
 		<script type="text/javascript" src="toolbar.js"></script>
 		<script type="text/javascript" src="favicon.js"></script>
-		<script type="text/javascript" src="cddb.js"></script>
+		<script type="text/javascript" src="input.js"></script>
+
 		<script type="text/javascript">
-			function pressed() {
-				let cddb = document.getElementById("sierp_input").value ;
-				console.log(cddb) ;
-				setFromGrid(cddbToGrid(cddb));
+			function enteredHex() {
+				let hexInput = document.getElementById("hex_input").value ;
+				console.log(hexInput) ;
+				let cdbbRearranged = rearrangeCddbString(hexInput) ;
+
+				setFromGrid(int32ToGrid(parseInt(cdbbRearranged, 16)));
 			}
 		</script>
 

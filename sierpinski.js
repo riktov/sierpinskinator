@@ -1,5 +1,4 @@
 /* sierpinski.js */
-console.log("This is Sierpinski") ;
 "use strict" ;
 
 var scale = 3 ;

@@ -1,3 +1,5 @@
+/* Module for  
+ */
 function rearrangeCddbString(cddbStr) {
     /* rearrange a CDDB string to place the least random digits at the front.*/
     let checkSum     = cddbStr.substring(0, 2) ;    //reliably random
@@ -35,7 +37,7 @@ function int32ToGrid(num32) {
     }
 
     //We only need as many colors as there are non-recursing cells,
-    //so we allot all remaining bits among the colors. The fewer colors needed,
+    //so we distribute all remaining bits among the colors. The fewer colors needed,
     //the more possible values for those colors.
 
     var colorPalette = [] ;
@@ -52,7 +54,7 @@ function int32ToGrid(num32) {
         idx = i % numFilled ;
         let bit = num32 % 2 ;
 
-        colorPalette[idx] = (colorPalette[idx] << 1) + bit ;
+        colorPalette[idx] = (colorPalette[idx] * 2) + bit ;
         num32 >>= 1 ;        
     }
 
@@ -65,8 +67,6 @@ function int32ToGrid(num32) {
             colors[i] = "#000000" ;
         }
     }
-
-    console.log(colors) ;
     
     let slicedStates = [
         states.slice(0, 3),
@@ -95,7 +95,7 @@ function intToRGB(n) {
         return "#de2bef" ;
     }
 
-    var cols = [
+    var rgbChannel = [
         0,0,0
     ]
     
@@ -103,7 +103,7 @@ function intToRGB(n) {
     for(var i = 0 ; i < 24; i++) {
         let bit = n % 2 ;
         let idx = i % 3 ;
-        cols[idx] = cols[idx] * 2 + bit ;
+        rgbChannel[idx] = rgbChannel[idx] * 2 + bit ;
         n >>= 1 ;
     }
 
@@ -113,35 +113,16 @@ function intToRGB(n) {
 
 
     for(var i = 0 ; i < 3 ; i++) {
-        //Since we have few bits to work with, most colors will be mostly zero. 
-        //We prefer bright colors, so invert the bits.        
-        let chan =  (cols[i]).toString(16) ;
+        let chan =  (rgbChannel[i]).toString(16) ;
         if(chan.length == 1) {  //pad
             chan = "0" + chan ;
         }
         rgbStr += chan;
     }
-
-    rgbStr = "#" + rgbStr ;
+    
+    //Since we have few bits to work with, most colors will be mostly zero. 
+    //We prefer bright colors, so invert the bits.        
+    rgbStr = "#" + rgbStr.replaceAll('0', 'a') ;
 
     return rgbStr ;
-    // return cols ;
 }
-
-function main() {
-    // process.argv.forEach(element => {
-    //     console.log(element) ;
-    // });
-    process.argv.shift() ; //node
-    process.argv.shift() ; //this script
-
-    var firstArg = process.argv.shift() ;
-    console.log("arg:", firstArg)
-
-    var num = parseInt(firstArg, 16) ;
-    // console.log(num) ;
-    console.log(cddbToGrid(firstArg)) ;
-    // console.log(intToRGB(num)) ;
-}
-
-main() ;
